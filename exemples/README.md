@@ -18,7 +18,10 @@ Exemples de messages :
 
 ## Installation
 
-1. **Le capteur des Bruins.** Dans `configuration.yaml` :
+1. **Le capteur des Bruins.** Avec NHL API v1.2 ou plus récent : *Paramètres →
+   Appareils et services → Ajouter une intégration → NHL API*, équipe **BOS**.
+   Le capteur (ex. `sensor.nhl_bos`) est trouvé automatiquement.
+   Avec une version plus ancienne, dans `configuration.yaml` :
 
    ```yaml
    sensor:

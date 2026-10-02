@@ -4,11 +4,8 @@
 #   - person.votre_nom                    -> votre personne dans Home Assistant
 #   - notify.mobile_app_votre_telephone   -> le service de votre telephone Android
 #
-# Necessite le capteur NHL dans configuration.yaml :
-#   sensor:
-#     - platform: nhl_api
-#       team_abbrev: bos
-#       name: Bruins
+# Necessite l'integration NHL API (v1.2+) ajoutee dans Parametres -> Appareils et
+# services avec l'equipe BOS. Le capteur est trouve automatiquement.
 - alias: "Bruins - annonce a l'arrivee a la maison"
   mode: single
   trigger:
@@ -17,10 +14,12 @@
       zone: zone.home
       event: enter
   variables:
-    capteur: sensor.bruins
     message: >-
-      {% set etat = states(capteur) %}
-      {% set a = states[capteur].attributes if states[capteur] else {} %}
+      {# Le capteur cree par l'integration NHL API (ajoutee par les menus). #}
+      {% set capteur = integration_entities('nhl_api') | select('match', 'sensor\\.') | first | default('') %}
+      {% set a = states[capteur].attributes if capteur and states[capteur] else {} %}
+      {# L'etat affiche la date du match ; game_state donne PRE, LIVE, FINAL... #}
+      {% set etat = a.get('game_state', states(capteur) if capteur else '') %}
       {% set debut = a.get('next_game_datetime') | string %}
       {% set aujourdhui = debut[:10] == now().strftime('%Y-%m-%d') %}
       {% set visiteur = a.get('away_name', 'les visiteurs') %}
