@@ -1,8 +1,12 @@
 # Annonce vocale à l'arrivée à la maison : les Bruins jouent-ils aujourd'hui, et le score.
 #
-# A adapter (2 lignes marquees "A ADAPTER") :
+# Si les Bruins jouent aujourd'hui, une video YouTube joue ensuite sur l'ecran.
+#
+# A adapter (3 lignes marquees "A ADAPTER") :
 #   - person.votre_nom                  -> votre personne dans Home Assistant
-#   - media_player.votre_haut_parleur   -> le haut-parleur qui fait l'annonce
+#   - media_player.votre_haut_parleur   -> l'ecran / haut-parleur Google Cast
+#   - ID_VIDEO_YOUTUBE                  -> l'identifiant de la video : dans
+#     https://www.youtube.com/watch?v=AbC123xyz c'est AbC123xyz
 #
 # Necessite l'integration NHL API (v1.2+) ajoutee dans Parametres -> Appareils et
 # services avec l'equipe BOS. Le capteur est trouve automatiquement.
@@ -18,6 +22,11 @@
       zone: zone.home
       event: enter
   variables:
+    haut_parleur: media_player.votre_haut_parleur  # A ADAPTER
+    bruins_aujourdhui: >-
+      {% set capteur = integration_entities('nhl_api') | select('match', 'sensor\\.') | first | default('') %}
+      {% set debut = (state_attr(capteur, 'next_game_datetime') | string) if capteur else '' %}
+      {{ debut[:10] == now().strftime('%Y-%m-%d') }}
     message: >-
       {# Le capteur cree par l'integration NHL API (ajoutee par les menus). #}
       {% set capteur = integration_entities('nhl_api') | select('match', 'sensor\\.') | first | default('') %}
@@ -51,11 +60,24 @@
       target:
         entity_id: tts.home_assistant_cloud
       data:
-        media_player_entity_id: media_player.votre_haut_parleur  # A ADAPTER
+        media_player_entity_id: "{{ haut_parleur }}"
         message: "{{ message | regex_replace('\\s+', ' ') | trim }}"
         language: fr-CA
         options:
           voice: SylvieNeural
+    # Si les Bruins jouent aujourd'hui : laisser finir l'annonce, puis la video.
+    - if:
+        - condition: template
+          value_template: "{{ bruins_aujourdhui }}"
+      then:
+        - delay: 15
+        - service: media_player.play_media
+          target:
+            entity_id: "{{ haut_parleur }}"
+          data:
+            media_content_type: cast
+            # A ADAPTER : remplacer ID_VIDEO_YOUTUBE (garder les guillemets)
+            media_content_id: '{"app_name": "youtube", "media_id": "ID_VIDEO_YOUTUBE"}'
     # Pour aussi l'entendre sur le telephone Android, enlever les # ci-dessous
     # et mettre le nom de votre telephone :
     # - service: notify.mobile_app_votre_telephone

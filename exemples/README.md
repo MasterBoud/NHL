@@ -53,6 +53,14 @@ Exemples de messages :
 *Paramètres → Automatisations* → « Bruins - annonce à l'arrivée à la maison »
 → menu ⋮ → **Exécuter**. Le haut-parleur doit parler.
 
+## Vidéo YouTube les soirs de match
+
+Si les Bruins jouent aujourd'hui, l'écran (ex. Google Nest Hub) lance une vidéo
+YouTube 15 secondes après l'annonce. Dans le fichier, remplacez
+`ID_VIDEO_YOUTUBE` par l'identifiant de la vidéo : pour
+`https://www.youtube.com/watch?v=AbC123xyz`, c'est `AbC123xyz` (pour un lien
+`https://youtu.be/AbC123xyz`, c'est aussi ce qui suit le dernier `/`).
+
 ## Bon à savoir
 
 - **Changer de voix :** dans le fichier, remplacez `SylvieNeural` par
