@@ -61,6 +61,15 @@ YouTube 15 secondes après l'annonce. Dans le fichier, remplacez
 `https://www.youtube.com/watch?v=AbC123xyz`, c'est `AbC123xyz` (pour un lien
 `https://youtu.be/AbC123xyz`, c'est aussi ce qui suit le dernier `/`).
 
+## Musique Spotify à chaque arrivée
+
+Après l'annonce (et après la vidéo les soirs de match, une fois celle-ci
+terminée), une playlist Spotify démarre sur le même appareil via **Music
+Assistant**, qui doit avoir Spotify comme fournisseur de musique (compte
+Premium). Dans le fichier, mettez l'appareil tel que Music Assistant le voit
+(ex. `media_player.hubcuisine_2`) et l'identifiant de la playlist : pour
+`https://open.spotify.com/playlist/AbC123?si=...`, c'est `AbC123`.
+
 ## Bon à savoir
 
 - **Changer de voix :** dans le fichier, remplacez `SylvieNeural` par

@@ -1,12 +1,18 @@
 # Annonce vocale à l'arrivée à la maison : les Bruins jouent-ils aujourd'hui, et le score.
 #
 # Si les Bruins jouent aujourd'hui, une video YouTube joue ensuite sur l'ecran.
+# Puis, a chaque arrivee (match ou non), une playlist Spotify demarre via
+# Music Assistant (qui doit avoir Spotify comme fournisseur de musique).
 #
-# A adapter (3 lignes marquees "A ADAPTER") :
+# A adapter (5 lignes marquees "A ADAPTER") :
 #   - person.votre_nom                  -> votre personne dans Home Assistant
 #   - media_player.votre_haut_parleur   -> l'ecran / haut-parleur Google Cast
 #   - ID_VIDEO_YOUTUBE                  -> l'identifiant de la video : dans
 #     https://www.youtube.com/watch?v=AbC123xyz c'est AbC123xyz
+#   - media_player.votre_lecteur_music_assistant -> le meme appareil vu par
+#     Music Assistant (ex. media_player.hubcuisine_2)
+#   - ID_PLAYLIST_SPOTIFY               -> dans
+#     https://open.spotify.com/playlist/AbC123?si=... c'est AbC123
 #
 # Necessite l'integration NHL API (v1.2+) ajoutee dans Parametres -> Appareils et
 # services avec l'equipe BOS. Le capteur est trouve automatiquement.
@@ -23,6 +29,8 @@
       event: enter
   variables:
     haut_parleur: media_player.votre_haut_parleur  # A ADAPTER
+    lecteur_musique: media_player.votre_lecteur_music_assistant  # A ADAPTER
+    playlist_spotify: https://open.spotify.com/playlist/ID_PLAYLIST_SPOTIFY  # A ADAPTER
     bruins_aujourdhui: >-
       {% set capteur = integration_entities('nhl_api') | select('match', 'sensor\\.') | first | default('') %}
       {% set debut = (state_attr(capteur, 'next_game_datetime') | string) if capteur else '' %}
@@ -65,7 +73,8 @@
         language: fr-CA
         options:
           voice: SylvieNeural
-    # Si les Bruins jouent aujourd'hui : laisser finir l'annonce, puis la video.
+    # Si les Bruins jouent aujourd'hui : laisser finir l'annonce, puis la video,
+    # et attendre la fin de la video. Sinon, laisser seulement finir l'annonce.
     - if:
         - condition: template
           value_template: "{{ bruins_aujourdhui }}"
@@ -78,6 +87,21 @@
             media_content_type: cast
             # A ADAPTER : remplacer ID_VIDEO_YOUTUBE (garder les guillemets)
             media_content_id: '{"app_name": "youtube", "media_id": "ID_VIDEO_YOUTUBE"}'
+        - wait_template: "{{ is_state(haut_parleur, 'playing') }}"
+          timeout: "00:01:00"
+          continue_on_timeout: true
+        - wait_template: "{{ not is_state(haut_parleur, 'playing') }}"
+          timeout: "00:20:00"
+          continue_on_timeout: true
+      else:
+        - delay: 15
+    # A chaque arrivee : la playlist Spotify.
+    - service: music_assistant.play_media
+      target:
+        entity_id: "{{ lecteur_musique }}"
+      data:
+        media_id: "{{ playlist_spotify }}"
+        media_type: playlist
     # Pour aussi l'entendre sur le telephone Android, enlever les # ci-dessous
     # et mettre le nom de votre telephone :
     # - service: notify.mobile_app_votre_telephone
