@@ -1,16 +1,16 @@
 # Annonce vocale à l'arrivée à la maison : les Bruins jouent-ils aujourd'hui, et le score.
 #
 # Si les Bruins jouent aujourd'hui, une video YouTube joue ensuite sur l'ecran.
-# Puis, a chaque arrivee (match ou non), une playlist Spotify demarre via
-# Music Assistant (qui doit avoir Spotify comme fournisseur de musique).
+# Puis (10 s apres la fin de la video les soirs de match), a chaque arrivee,
+# une playlist Spotify demarre via Music Assistant (qui doit avoir Spotify comme fournisseur de musique).
 #
 # A adapter (5 lignes marquees "A ADAPTER") :
 #   - person.votre_nom                  -> votre personne dans Home Assistant
 #   - media_player.votre_haut_parleur   -> l'ecran / haut-parleur Google Cast
 #   - ID_VIDEO_YOUTUBE                  -> l'identifiant de la video : dans
 #     https://www.youtube.com/watch?v=AbC123xyz c'est AbC123xyz
-#   - media_player.votre_lecteur_music_assistant -> le meme appareil vu par
-#     Music Assistant (ex. media_player.hubcuisine_2)
+#   - media_player.votre_lecteur_music_assistant -> l'appareil (vu par Music
+#     Assistant) ou jouera la musique, ex. une enceinte ou un groupe d'enceintes
 #   - ID_PLAYLIST_SPOTIFY               -> dans
 #     https://open.spotify.com/playlist/AbC123?si=... c'est AbC123
 #
@@ -74,7 +74,7 @@
         options:
           voice: SylvieNeural
     # Si les Bruins jouent aujourd'hui : laisser finir l'annonce, puis la video,
-    # et attendre la fin de la video. Sinon, laisser seulement finir l'annonce.
+    # puis 10 s de pause. Sinon, laisser seulement finir l'annonce.
     - if:
         - condition: template
           value_template: "{{ bruins_aujourdhui }}"
@@ -90,9 +90,14 @@
         - wait_template: "{{ is_state(haut_parleur, 'playing') }}"
           timeout: "00:01:00"
           continue_on_timeout: true
-        - wait_template: "{{ not is_state(haut_parleur, 'playing') }}"
-          timeout: "00:20:00"
-          continue_on_timeout: true
+        # Laisser jouer la video sur toute sa duree (3 min si inconnue), puis
+        # l'arreter : YouTube enchainerait sinon une autre video.
+        - delay:
+            seconds: "{{ (state_attr(haut_parleur, 'media_duration') or 180) | int }}"
+        - service: media_player.media_stop
+          target:
+            entity_id: "{{ haut_parleur }}"
+        - delay: 10
       else:
         - delay: 15
     # A chaque arrivee : la playlist Spotify.

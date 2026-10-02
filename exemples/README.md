@@ -63,11 +63,11 @@ YouTube 15 secondes après l'annonce. Dans le fichier, remplacez
 
 ## Musique Spotify à chaque arrivée
 
-Après l'annonce (et après la vidéo les soirs de match, une fois celle-ci
-terminée), une playlist Spotify démarre sur le même appareil via **Music
-Assistant**, qui doit avoir Spotify comme fournisseur de musique (compte
-Premium). Dans le fichier, mettez l'appareil tel que Music Assistant le voit
-(ex. `media_player.hubcuisine_2`) et l'identifiant de la playlist : pour
+Après l'annonce (les soirs de match : 10 secondes après la fin de la vidéo,
+que l'automatisation arrête au bout de sa durée pour éviter que YouTube en
+enchaîne une autre), une playlist Spotify démarre via **Music Assistant**, qui doit avoir Spotify comme fournisseur de musique (compte
+Premium). Dans le fichier, mettez l'appareil de musique tel que Music Assistant le
+voit (une enceinte ou un groupe, pas forcément l'écran de l'annonce) et l'identifiant de la playlist : pour
 `https://open.spotify.com/playlist/AbC123?si=...`, c'est `AbC123`.
 
 ## Bon à savoir
