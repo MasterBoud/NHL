@@ -107,6 +107,14 @@
       data:
         media_id: "{{ playlist_spotify }}"
         media_type: playlist
+    # Puis le classement de la Conference de l'Est sur l'ecran (via Home Assistant
+    # Cloud). Necessite exemples/nhl_classement.yaml et nhl_classement_tableau.yaml.
+    - delay: 5
+    - service: cast.show_lovelace_view
+      data:
+        entity_id: "{{ haut_parleur }}"
+        dashboard_path: nhl-classement
+        view_path: est
     # Pour aussi l'entendre sur le telephone Android, enlever les # ci-dessous
     # et mettre le nom de votre telephone :
     # - service: notify.mobile_app_votre_telephone

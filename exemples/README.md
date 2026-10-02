@@ -70,6 +70,33 @@ Premium). Dans le fichier, mettez l'appareil de musique tel que Music Assistant 
 voit (une enceinte ou un groupe, pas forcément l'écran de l'annonce) et l'identifiant de la playlist : pour
 `https://open.spotify.com/playlist/AbC123?si=...`, c'est `AbC123`.
 
+## Classement NHL à l'écran
+
+Après la musique, l'écran Google (ex. Nest Hub) affiche le classement à jour de
+la Conférence de l'Est (les Bruins en gras), via Home Assistant Cloud.
+
+1. Envoyez [`nhl_classement.yaml`](nhl_classement.yaml) et
+   [`nhl_classement_tableau.yaml`](nhl_classement_tableau.yaml) dans le dossier
+   de configuration (à côté de `configuration.yaml`).
+2. Ajoutez dans `configuration.yaml` :
+
+   ```yaml
+   homeassistant:
+     packages:
+       nhl: !include nhl_classement.yaml
+
+   lovelace:
+     dashboards:
+       nhl-classement:
+         mode: yaml
+         filename: nhl_classement_tableau.yaml
+         title: Classement NHL
+         icon: mdi:hockey-sticks
+   ```
+
+3. Vérifiez la configuration et redémarrez. Le tableau « Classement NHL »
+   apparaît dans le menu de gauche.
+
 ## Bon à savoir
 
 - **Changer de voix :** dans le fichier, remplacez `SylvieNeural` par

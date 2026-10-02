@@ -1,0 +1,31 @@
+# Tableau de bord "Classement NHL" (mode YAML), vue "est".
+# A brancher dans configuration.yaml :
+#   lovelace:
+#     dashboards:
+#       nhl-classement:
+#         mode: yaml
+#         filename: nhl_classement_tableau.yaml
+#         title: Classement NHL
+#         icon: mdi:hockey-sticks
+title: Classement NHL
+views:
+  - title: Conférence de l'Est
+    path: est
+    panel: true
+    cards:
+      - type: markdown
+        content: |
+          {% set equipes = state_attr('sensor.nhl_classement', 'standings') or [] %}
+          {% set est = equipes | selectattr('conferenceAbbrev', 'eq', 'E')
+             | sort(attribute='conferenceSequence') | list %}
+          ## 🏒 Conférence de l'Est
+
+          | # | Équipe | PJ | V | D | DP | Pts | +/- |
+          |:-:|:--|:-:|:-:|:-:|:-:|:-:|:-:|
+          {% for t in est -%}
+          {%- set nom = t.teamName.fr or t.teamName.default -%}
+          {%- set nom = '**' ~ nom ~ '**' if t.teamAbbrev.default == 'BOS' else nom -%}
+          | {{ t.conferenceSequence }} | {{ nom }} | {{ t.gamesPlayed }} | {{ t.wins }} | {{ t.losses }} | {{ t.otLosses }} | **{{ t.points }}** | {{ ('%+d' % t.goalDifferential) if t.goalDifferential else 0 }} |
+          {% endfor %}
+
+          *Mis à jour : {{ as_timestamp(states.sensor.nhl_classement.last_updated) | timestamp_custom('%-d/%m à %H h %M') if states.sensor.nhl_classement else '—' }}*
