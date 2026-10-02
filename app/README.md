@@ -6,6 +6,11 @@ l'API publique de la NHL (`api-web.nhle.com`), mises en cache 15 s.
 
 ## Lancer
 
+Sous Windows : double-cliquer sur `lancer.bat`. Le navigateur s'ouvre tout
+seul ; fermer la fenêtre noire arrête l'app.
+
+Autrement :
+
 ```bash
 cd app
 python3 -m nhl_score --port 8000        # options : --host 0.0.0.0 --ttl 15
