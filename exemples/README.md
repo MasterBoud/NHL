@@ -97,6 +97,19 @@ la Conférence de l'Est (les Bruins en gras), via Home Assistant Cloud.
 3. Vérifiez la configuration et redémarrez. Le tableau « Classement NHL »
    apparaît dans le menu de gauche.
 
+## Horaire des enfants (Rétroaction)
+
+Une minute après le classement, l'écran affiche l'horaire de la semaine
+(matchs et pratiques) de vos enfants, tiré de Rétroaction.
+
+1. Dans Rétroaction, ouvrez l'horaire de chaque enfant et copiez son lien
+   d'abonnement au calendrier (iCal). Ce lien est personnel : ne le partagez pas.
+2. Dans Home Assistant : *Paramètres → Appareils et services → Ajouter une
+   intégration → Remote Calendar*, nommez-le (ex. le prénom) et collez le lien
+   (remplacez `webcal://` par `https://`). Une fois par enfant.
+3. Dans `nhl_classement_tableau.yaml`, remplacez `calendar.enfant_1` et
+   `calendar.enfant_2` par les calendriers créés (ex. `calendar.liam`).
+
 ## Bon à savoir
 
 - **Changer de voix :** dans le fichier, remplacez `SylvieNeural` par

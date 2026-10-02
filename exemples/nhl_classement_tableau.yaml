@@ -1,4 +1,7 @@
-# Tableau de bord "Classement NHL" (mode YAML), vue "est".
+# Tableau de bord "Classement NHL" (mode YAML) : vue "est" (classement de la
+# Conference de l'Est) et vue "horaire" (matchs et pratiques des enfants).
+# A adapter dans la vue "horaire" : calendar.enfant_1 et calendar.enfant_2 ->
+# les calendriers Retroaction ajoutes avec l'integration "Remote Calendar".
 # A brancher dans configuration.yaml :
 #   lovelace:
 #     dashboards:
@@ -29,3 +32,13 @@ views:
           {% endfor %}
 
           *Mis à jour : {{ as_timestamp(states.sensor.nhl_classement.last_updated) | timestamp_custom('%-d/%m à %H h %M') if states.sensor.nhl_classement else '—' }}*
+  - title: Horaire hockey
+    path: horaire
+    panel: true
+    cards:
+      - type: calendar
+        title: 🏒 Matchs et pratiques
+        initial_view: listWeek
+        entities:
+          - calendar.enfant_1  # A ADAPTER
+          - calendar.enfant_2  # A ADAPTER

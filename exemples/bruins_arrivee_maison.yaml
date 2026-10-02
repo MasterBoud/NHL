@@ -115,6 +115,13 @@
         entity_id: "{{ haut_parleur }}"
         dashboard_path: nhl-classement
         view_path: est
+    # Une minute plus tard : l'horaire des matchs et pratiques des enfants.
+    - delay: 60
+    - service: cast.show_lovelace_view
+      data:
+        entity_id: "{{ haut_parleur }}"
+        dashboard_path: nhl-classement
+        view_path: horaire
     # Pour aussi l'entendre sur le telephone Android, enlever les # ci-dessous
     # et mettre le nom de votre telephone :
     # - service: notify.mobile_app_votre_telephone
