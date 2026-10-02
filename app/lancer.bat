@@ -15,7 +15,5 @@ if not defined PY (
 
 echo Demarrage de Scores NHL sur http://127.0.0.1:8000
 echo Fermez cette fenetre pour arreter l'app.
-rem Ouvre le navigateur apres 2 secondes, le temps que le serveur demarre.
-start "" /b cmd /c "timeout /t 2 /nobreak >nul & start http://127.0.0.1:8000"
-%PY% -m nhl_score
+%PY% -m nhl_score --open
 pause

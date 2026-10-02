@@ -13,6 +13,8 @@ import argparse
 import json
 import mimetypes
 import re
+import sys
+import webbrowser
 from datetime import date as date_cls
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -102,9 +104,21 @@ def main(argv=None):
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--ttl", type=int, default=15, help="upstream cache seconds")
+    parser.add_argument("--open", action="store_true", help="open the app in the browser")
     args = parser.parse_args(argv)
-    server = ThreadingHTTPServer((args.host, args.port), make_handler(NHLClient(ttl=args.ttl)))
-    print(f"NHL Score running on http://{args.host}:{args.port}")
+    url = f"http://{args.host}:{args.port}"
+    try:
+        server = ThreadingHTTPServer((args.host, args.port), make_handler(NHLClient(ttl=args.ttl)))
+    except OSError as err:
+        # Usually an earlier copy of the app is still running on this port.
+        print(f"Impossible d'utiliser le port {args.port} ({err}).")
+        print(f"L'app tourne peut-etre deja : ouvrez {url}")
+        if args.open:
+            webbrowser.open(url)
+        sys.exit(1)
+    print(f"NHL Score running on {url}")
+    if args.open:
+        webbrowser.open(url)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
