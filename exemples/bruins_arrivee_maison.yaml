@@ -1,0 +1,52 @@
+# Annonce vocale à l'arrivée à la maison : les Bruins jouent-ils aujourd'hui, et le score.
+#
+# A adapter avant de coller dans automations.yaml (2 lignes marquees "A ADAPTER") :
+#   - person.votre_nom                    -> votre personne dans Home Assistant
+#   - notify.mobile_app_votre_telephone   -> le service de votre telephone Android
+#
+# Necessite l'integration NHL API (v1.2+) ajoutee dans Parametres -> Appareils et
+# services avec l'equipe BOS. Le capteur est trouve automatiquement.
+- alias: "Bruins - annonce a l'arrivee a la maison"
+  id: bruins_arrivee_maison  # garde l'historique (traces) des executions
+  mode: single
+  trigger:
+    - platform: zone
+      entity_id: person.votre_nom  # A ADAPTER
+      zone: zone.home
+      event: enter
+  variables:
+    message: >-
+      {# Le capteur cree par l'integration NHL API (ajoutee par les menus). #}
+      {% set capteur = integration_entities('nhl_api') | select('match', 'sensor\\.') | first | default('') %}
+      {% set a = states[capteur].attributes if capteur and states[capteur] else {} %}
+      {# L'etat affiche la date du match ; game_state donne PRE, LIVE, FINAL... #}
+      {% set etat = a.get('game_state', states(capteur) if capteur else '') %}
+      {% set debut = a.get('next_game_datetime') | string %}
+      {% set aujourdhui = debut[:10] == now().strftime('%Y-%m-%d') %}
+      {% set visiteur = a.get('away_name', 'les visiteurs') %}
+      {% set local = a.get('home_name', 'les locaux') %}
+      {% set score = visiteur ~ ' ' ~ a.get('away_score', 0) ~ ', ' ~ local ~ ' ' ~ a.get('home_score', 0) %}
+      {% if etat in ['LIVE', 'CRIT'] %}
+        Les Bruins jouent en ce moment. {{ score }}.
+        {% if a.get('is_intermission') %}C'est l'entracte après la période {{ a.get('current_period', '') }}.
+        {% else %}Période {{ a.get('current_period', '') }}, il reste {{ a.get('time_remaining', '') }}.{% endif %}
+      {% elif etat in ['OVER', 'FINAL', 'OFF'] and aujourdhui %}
+        Le match des Bruins est terminé. Score final : {{ score }}.
+      {% elif aujourdhui %}
+        {% set heure = as_timestamp(a.get('next_game_datetime')) | timestamp_custom('%-H h %M') %}
+        Les Bruins jouent aujourd'hui à {{ heure }} : {{ visiteur }} contre {{ local }}.
+      {% else %}
+        Les Bruins ne jouent pas aujourd'hui.
+        {% if a.get('next_game_datetime') %}
+          {% set mois = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'] %}
+          {% set ts = as_timestamp(a.get('next_game_datetime')) %}
+          Prochain match le {{ ts | timestamp_custom('%-d') }} {{ mois[(ts | timestamp_custom('%-m') | int) - 1] }} à {{ ts | timestamp_custom('%-H h %M') }}.
+        {% endif %}
+      {% endif %}
+  action:
+    - service: notify.mobile_app_votre_telephone  # A ADAPTER
+      data:
+        message: TTS
+        data:
+          tts_text: "{{ message | regex_replace('\\s+', ' ') | trim }}"
+          media_stream: alarm_stream
