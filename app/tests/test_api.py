@@ -38,7 +38,9 @@ STANDINGS = {"standings": [
      "points": 4, "gamesPlayed": 2, "streakCode": "W", "streakCount": 2},
 ]}
 LANDING = {**SCORE["games"][0], "goals": None, "summary": {"scoring": [
-    {"periodDescriptor": {"number": 1}, "goals": SCORE["games"][0]["goals"]},
+    # Gamecenter localizes teamAbbrev, unlike the score feed.
+    {"periodDescriptor": {"number": 1},
+     "goals": [{**SCORE["games"][0]["goals"][0], "teamAbbrev": {"default": "MTL"}}]},
 ]}}
 
 
@@ -82,6 +84,7 @@ class ModelTests(unittest.TestCase):
         detail = models.game_detail(LANDING)
         self.assertEqual(len(detail["goals"]), 1)
         self.assertEqual(detail["goals"][0]["period"], 1)
+        self.assertEqual(detail["goals"][0]["team"], "MTL")
 
     def test_period_labels(self):
         self.assertEqual(models._period_label({"number": 1, "periodType": "REG"}), "1re")

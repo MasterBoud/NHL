@@ -49,7 +49,7 @@ def _goal(raw):
     return {
         "period": (raw.get("periodDescriptor") or {}).get("number", raw.get("period")),
         "time": raw.get("timeInPeriod"),
-        "team": raw.get("teamAbbrev"),
+        "team": _text(raw.get("teamAbbrev")),
         "scorer": _text(raw.get("name")),
         "scorer_total": raw.get("goalsToDate"),
         "strength": (raw.get("strength") or "ev").upper(),
