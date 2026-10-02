@@ -1,11 +1,14 @@
 # Annonce vocale à l'arrivée à la maison : les Bruins jouent-ils aujourd'hui, et le score.
 #
-# A adapter avant de coller dans automations.yaml (2 lignes marquees "A ADAPTER") :
-#   - person.votre_nom                    -> votre personne dans Home Assistant
-#   - notify.mobile_app_votre_telephone   -> le service de votre telephone Android
+# A adapter (2 lignes marquees "A ADAPTER") :
+#   - person.votre_nom                  -> votre personne dans Home Assistant
+#   - media_player.votre_haut_parleur   -> le haut-parleur qui fait l'annonce
 #
 # Necessite l'integration NHL API (v1.2+) ajoutee dans Parametres -> Appareils et
 # services avec l'equipe BOS. Le capteur est trouve automatiquement.
+# La voix vient de Home Assistant Cloud (tts.home_assistant_cloud), en francais
+# du Quebec. Voix possibles : SylvieNeural (femme), AntoineNeural, JeanNeural,
+# ThierryNeural (hommes).
 - alias: "Bruins - annonce a l'arrivee a la maison"
   id: bruins_arrivee_maison  # garde l'historique (traces) des executions
   mode: single
@@ -44,9 +47,20 @@
         {% endif %}
       {% endif %}
   action:
-    - service: notify.mobile_app_votre_telephone  # A ADAPTER
+    - service: tts.speak
+      target:
+        entity_id: tts.home_assistant_cloud
       data:
-        message: TTS
-        data:
-          tts_text: "{{ message | regex_replace('\\s+', ' ') | trim }}"
-          media_stream: alarm_stream
+        media_player_entity_id: media_player.votre_haut_parleur  # A ADAPTER
+        message: "{{ message | regex_replace('\\s+', ' ') | trim }}"
+        language: fr-CA
+        options:
+          voice: SylvieNeural
+    # Pour aussi l'entendre sur le telephone Android, enlever les # ci-dessous
+    # et mettre le nom de votre telephone :
+    # - service: notify.mobile_app_votre_telephone
+    #   data:
+    #     message: TTS
+    #     data:
+    #       tts_text: "{{ message | regex_replace('\\s+', ' ') | trim }}"
+    #       media_stream: alarm_stream

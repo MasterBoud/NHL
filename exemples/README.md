@@ -1,7 +1,8 @@
 # Annonce des Bruins à l'arrivée à la maison
 
-Quand vous arrivez chez vous, votre téléphone Android dit à voix haute si les
-Bruins jouent aujourd'hui, et le score si le match est commencé ou terminé.
+Quand vous arrivez chez vous, un haut-parleur de la maison (ex. Google Nest Hub)
+dit à voix haute si les Bruins jouent aujourd'hui, et le score si le match est
+commencé ou terminé.
 
 Exemples de messages :
 
@@ -13,8 +14,10 @@ Exemples de messages :
 ## Ce qu'il faut
 
 - Home Assistant avec l'intégration **NHL API** (HACS → chercher « NHL »).
-- L'application **Home Assistant** sur le téléphone Android, connectée et avec
-  la localisation autorisée « tout le temps » (c'est elle qui détecte l'arrivée).
+- L'application **Home Assistant** sur le téléphone, connectée et avec la
+  localisation autorisée « tout le temps » (c'est elle qui détecte l'arrivée).
+- **Home Assistant Cloud** (`tts.home_assistant_cloud`) pour la voix, et un
+  haut-parleur compatible (Google Cast, Sonos…).
 
 ## Installation
 
@@ -36,9 +39,9 @@ Exemples de messages :
 2. **Trouver vos deux noms à adapter.**
    - Votre personne : *Paramètres → Personnes* ; l'identifiant ressemble à
      `person.carl`.
-   - Votre téléphone : *Outils de développement → Actions*, tapez
-     `notify.mobile_app` ; prenez celui de votre téléphone, par exemple
-     `notify.mobile_app_galaxy_s24`.
+   - Votre haut-parleur : *Outils de développement → États*, tapez
+     `media_player.` ; prenez celui de l'appareil lui-même (Google Cast),
+     par exemple `media_player.hubcuisine`, pas sa copie Music Assistant.
 
 3. **L'automatisation.** Copiez le contenu de
    [`bruins_arrivee_maison.yaml`](bruins_arrivee_maison.yaml) à la fin de
@@ -48,15 +51,14 @@ Exemples de messages :
 ## Tester sans sortir de chez soi
 
 *Paramètres → Automatisations* → « Bruins - annonce à l'arrivée à la maison »
-→ menu ⋮ → **Exécuter**. Le téléphone doit parler.
+→ menu ⋮ → **Exécuter**. Le haut-parleur doit parler.
 
 ## Bon à savoir
 
-- Le message utilise le flux « alarme » d'Android : il est audible même si le
-  téléphone est en mode silencieux. Pour l'éviter, remplacez `alarm_stream`
-  par `music_stream`.
-- La voix est celle du moteur de synthèse vocale du téléphone ; s'il parle
-  avec un accent anglais, choisissez le français dans *Paramètres Android →
-  Synthèse vocale*.
-- Autre équipe : changez `team_abbrev` (voir [teams.md](../teams.md)), le nom
-  du capteur et le mot « Bruins » dans les messages.
+- **Changer de voix :** dans le fichier, remplacez `SylvieNeural` par
+  `AntoineNeural`, `JeanNeural` ou `ThierryNeural` (voix québécoises).
+- **Aussi sur le téléphone :** enlevez les `#` du bloc commenté à la fin du
+  fichier et mettez le nom de votre téléphone (`notify.mobile_app_...`). Ce
+  message passe par le flux « alarme » d'Android, audible même en silencieux.
+- Autre équipe : changez l'équipe de l'intégration NHL API et le mot « Bruins »
+  dans les messages.
