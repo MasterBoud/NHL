@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scores NHL</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>🏒 Scores NHL</h1>
+    <nav class="tabs">
+      <button data-view="scores" class="active">Scores</button>
+      <button data-view="standings">Classement</button>
+    </nav>
+  </header>
+  <main>
+    <section id="scores-view">
+      <div class="toolbar">
+        <button id="prev" aria-label="Jour précédent">‹</button>
+        <input type="date" id="date">
+        <button id="next" aria-label="Jour suivant">›</button>
+        <button id="today">Aujourd'hui</button>
+        <input id="team" placeholder="Équipe (ex. MTL)" maxlength="3">
+      </div>
+      <p id="status" class="muted"></p>
+      <div id="games" class="grid"></div>
+    </section>
+    <section id="standings-view" hidden>
+      <table id="standings">
+        <thead><tr><th>#</th><th>Équipe</th><th>PJ</th><th>V</th><th>D</th><th>DP</th><th>Pts</th><th>+/-</th><th>Séq.</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+  <dialog id="detail"><div id="detail-body"></div><form method="dialog"><button>Fermer</button></form></dialog>
+  <script src="app.js"></script>
+</body>
+</html>
