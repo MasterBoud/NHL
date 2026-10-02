@@ -7,6 +7,7 @@
 # Necessite l'integration NHL API (v1.2+) ajoutee dans Parametres -> Appareils et
 # services avec l'equipe BOS. Le capteur est trouve automatiquement.
 - alias: "Bruins - annonce a l'arrivee a la maison"
+  id: bruins_arrivee_maison  # garde l'historique (traces) des executions
   mode: single
   trigger:
     - platform: zone
