@@ -1,11 +1,24 @@
 # Annonce vocale à l'arrivée à la maison : les Bruins jouent-ils aujourd'hui, et le score.
 #
-# A adapter avant de coller dans automations.yaml (2 lignes marquees "A ADAPTER") :
-#   - person.votre_nom                    -> votre personne dans Home Assistant
-#   - notify.mobile_app_votre_telephone   -> le service de votre telephone Android
+# Si les Bruins jouent aujourd'hui, une video YouTube joue ensuite sur l'ecran.
+# Puis (10 s apres la fin de la video les soirs de match), a chaque arrivee,
+# une playlist Spotify demarre via Music Assistant (qui doit avoir Spotify comme fournisseur de musique).
+#
+# A adapter (5 lignes marquees "A ADAPTER") :
+#   - person.votre_nom                  -> votre personne dans Home Assistant
+#   - media_player.votre_haut_parleur   -> l'ecran / haut-parleur Google Cast
+#   - ID_VIDEO_YOUTUBE                  -> l'identifiant de la video : dans
+#     https://www.youtube.com/watch?v=AbC123xyz c'est AbC123xyz
+#   - media_player.votre_lecteur_music_assistant -> l'appareil (vu par Music
+#     Assistant) ou jouera la musique, ex. une enceinte ou un groupe d'enceintes
+#   - ID_PLAYLIST_SPOTIFY               -> dans
+#     https://open.spotify.com/playlist/AbC123?si=... c'est AbC123
 #
 # Necessite l'integration NHL API (v1.2+) ajoutee dans Parametres -> Appareils et
 # services avec l'equipe BOS. Le capteur est trouve automatiquement.
+# La voix vient de Home Assistant Cloud (tts.home_assistant_cloud), en francais
+# du Quebec. Voix possibles : SylvieNeural (femme), AntoineNeural, JeanNeural,
+# ThierryNeural (hommes).
 - alias: "Bruins - annonce a l'arrivee a la maison"
   id: bruins_arrivee_maison  # garde l'historique (traces) des executions
   mode: single
@@ -15,6 +28,13 @@
       zone: zone.home
       event: enter
   variables:
+    haut_parleur: media_player.votre_haut_parleur  # A ADAPTER
+    lecteur_musique: media_player.votre_lecteur_music_assistant  # A ADAPTER
+    playlist_spotify: https://open.spotify.com/playlist/ID_PLAYLIST_SPOTIFY  # A ADAPTER
+    bruins_aujourdhui: >-
+      {% set capteur = integration_entities('nhl_api') | select('match', 'sensor\\.') | first | default('') %}
+      {% set debut = (state_attr(capteur, 'next_game_datetime') | string) if capteur else '' %}
+      {{ debut[:10] == now().strftime('%Y-%m-%d') }}
     message: >-
       {# Le capteur cree par l'integration NHL API (ajoutee par les menus). #}
       {% set capteur = integration_entities('nhl_api') | select('match', 'sensor\\.') | first | default('') %}
@@ -44,9 +64,69 @@
         {% endif %}
       {% endif %}
   action:
-    - service: notify.mobile_app_votre_telephone  # A ADAPTER
+    - service: tts.speak
+      target:
+        entity_id: tts.home_assistant_cloud
       data:
-        message: TTS
-        data:
-          tts_text: "{{ message | regex_replace('\\s+', ' ') | trim }}"
-          media_stream: alarm_stream
+        media_player_entity_id: "{{ haut_parleur }}"
+        message: "{{ message | regex_replace('\\s+', ' ') | trim }}"
+        language: fr-CA
+        options:
+          voice: SylvieNeural
+    # Si les Bruins jouent aujourd'hui : laisser finir l'annonce, puis la video,
+    # puis 10 s de pause. Sinon, laisser seulement finir l'annonce.
+    - if:
+        - condition: template
+          value_template: "{{ bruins_aujourdhui }}"
+      then:
+        - delay: 15
+        - service: media_player.play_media
+          target:
+            entity_id: "{{ haut_parleur }}"
+          data:
+            media_content_type: cast
+            # A ADAPTER : remplacer ID_VIDEO_YOUTUBE (garder les guillemets)
+            media_content_id: '{"app_name": "youtube", "media_id": "ID_VIDEO_YOUTUBE"}'
+        - wait_template: "{{ is_state(haut_parleur, 'playing') }}"
+          timeout: "00:01:00"
+          continue_on_timeout: true
+        # Laisser jouer la video sur toute sa duree (3 min si inconnue), puis
+        # l'arreter : YouTube enchainerait sinon une autre video.
+        - delay:
+            seconds: "{{ (state_attr(haut_parleur, 'media_duration') or 180) | int }}"
+        - service: media_player.media_stop
+          target:
+            entity_id: "{{ haut_parleur }}"
+        - delay: 10
+      else:
+        - delay: 15
+    # A chaque arrivee : la playlist Spotify.
+    - service: music_assistant.play_media
+      target:
+        entity_id: "{{ lecteur_musique }}"
+      data:
+        media_id: "{{ playlist_spotify }}"
+        media_type: playlist
+    # Puis le classement de la Conference de l'Est sur l'ecran (via Home Assistant
+    # Cloud). Necessite exemples/nhl_classement.yaml et nhl_classement_tableau.yaml.
+    - delay: 5
+    - service: cast.show_lovelace_view
+      data:
+        entity_id: "{{ haut_parleur }}"
+        dashboard_path: nhl-classement
+        view_path: est
+    # Une minute plus tard : l'horaire des matchs et pratiques des enfants.
+    - delay: 60
+    - service: cast.show_lovelace_view
+      data:
+        entity_id: "{{ haut_parleur }}"
+        dashboard_path: nhl-classement
+        view_path: horaire
+    # Pour aussi l'entendre sur le telephone Android, enlever les # ci-dessous
+    # et mettre le nom de votre telephone :
+    # - service: notify.mobile_app_votre_telephone
+    #   data:
+    #     message: TTS
+    #     data:
+    #       tts_text: "{{ message | regex_replace('\\s+', ' ') | trim }}"
+    #       media_stream: alarm_stream

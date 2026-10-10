@@ -1,0 +1,16 @@
+# Paquet Home Assistant : classement NHL a jour (rafraichi toutes les 30 min).
+# Cree sensor.nhl_classement, dont l'attribut "standings" contient les 32 equipes.
+# A brancher dans configuration.yaml :
+#   homeassistant:
+#     packages:
+#       nhl: !include nhl_classement.yaml
+rest:
+  - resource: https://api-web.nhle.com/v1/standings/now
+    scan_interval: 1800
+    sensor:
+      - name: NHL classement
+        unique_id: nhl_classement
+        icon: mdi:podium
+        value_template: "{{ value_json.standings | length }}"
+        json_attributes:
+          - standings
