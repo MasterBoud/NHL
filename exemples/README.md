@@ -110,6 +110,22 @@ Une minute après le classement, l'écran affiche l'horaire de la semaine
 3. Dans `nhl_classement_tableau.yaml`, remplacez `calendar.enfant_1` et
    `calendar.enfant_2` par les calendriers créés (ex. `calendar.hockey_enfant`).
 
+## But des Bruins sur les lumières Govee
+
+[`bruins_but_govee.yaml`](bruins_but_govee.yaml) : quand le score des Bruins
+augmente pendant un match en direct, les lumières clignotent or et blanc six
+fois, puis reprennent leur état d'avant. Envoyez le fichier à côté de
+`configuration.yaml`, remplacez le capteur NHL et les lumières (`A ADAPTER`),
+puis ajoutez dans `configuration.yaml` :
+
+```yaml
+automation but: !include bruins_but_govee.yaml
+```
+
+Le capteur NHL se met à jour quelques secondes après le but ; selon le délai
+de votre télé ou de votre diffusion, les lumières peuvent réagir un peu avant
+ou après l'image.
+
 ## Bon à savoir
 
 - **Changer de voix :** dans le fichier, remplacez `SylvieNeural` par

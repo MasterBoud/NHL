@@ -1,0 +1,66 @@
+# But des Bruins : les lumieres Govee clignotent or et noir, puis reviennent
+# a leur etat d'avant.
+#
+# Le but est detecte quand le score des Bruins augmente pendant un match en
+# direct (capteur de l'integration NHL API, ex. sensor.nhl_bos).
+#
+# A adapter (lignes marquees "A ADAPTER") :
+#   - sensor.nhl_bos (2 fois)      -> votre capteur NHL API
+#   - light.govee_1, light.govee_2 -> vos lumieres Govee (autant que voulu)
+#
+# A brancher dans configuration.yaml :
+#   automation but: !include bruins_but_govee.yaml
+- alias: "Bruins - but sur les lumieres Govee"
+  id: bruins_but_govee
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: sensor.nhl_bos  # A ADAPTER
+      attribute: away_score
+    - platform: state
+      entity_id: sensor.nhl_bos  # A ADAPTER
+      attribute: home_score
+  variables:
+    equipe_id: 6  # 6 = Boston Bruins (voir teams.md)
+    lumieres:
+      - light.govee_1  # A ADAPTER
+      - light.govee_2  # A ADAPTER
+  condition:
+    # Le score qui a augmente est celui des Bruins, pendant un match en direct.
+    - condition: template
+      value_template: >-
+        {% set a = trigger.to_state.attributes %}
+        {% set cote = 'away' if trigger.attribute == 'away_score' else 'home' %}
+        {% set avant = trigger.from_state.attributes.get(trigger.attribute) %}
+        {% set apres = a.get(trigger.attribute) %}
+        {{ a.get(cote ~ '_id') == equipe_id
+           and a.get('game_state') in ['LIVE', 'CRIT']
+           and avant is number and apres is number and apres > avant }}
+  action:
+    # Memoriser l'etat des lumieres pour le remettre apres.
+    - service: scene.create
+      data:
+        scene_id: avant_but_bruins
+        snapshot_entities: "{{ lumieres }}"
+    - repeat:
+        count: 6
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: "{{ lumieres }}"
+            data:
+              rgb_color: [252, 181, 20]  # or des Bruins
+              brightness_pct: 100
+          - delay:
+              milliseconds: 700
+          - service: light.turn_on
+            target:
+              entity_id: "{{ lumieres }}"
+            data:
+              rgb_color: [255, 255, 255]
+              brightness_pct: 15
+          - delay:
+              milliseconds: 700
+    - service: scene.turn_on
+      target:
+        entity_id: scene.avant_but_bruins
