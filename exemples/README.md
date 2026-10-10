@@ -38,10 +38,10 @@ Exemples de messages :
 
 2. **Trouver vos deux noms à adapter.**
    - Votre personne : *Paramètres → Personnes* ; l'identifiant ressemble à
-     `person.carl`.
+     `person.jean`.
    - Votre haut-parleur : *Outils de développement → États*, tapez
      `media_player.` ; prenez celui de l'appareil lui-même (Google Cast),
-     par exemple `media_player.hubcuisine`, pas sa copie Music Assistant.
+     par exemple `media_player.nest_cuisine`, pas sa copie Music Assistant.
 
 3. **L'automatisation.** Copiez le contenu de
    [`bruins_arrivee_maison.yaml`](bruins_arrivee_maison.yaml) à la fin de
@@ -108,7 +108,7 @@ Une minute après le classement, l'écran affiche l'horaire de la semaine
    intégration → Remote Calendar*, nommez-le (ex. le prénom) et collez le lien
    (remplacez `webcal://` par `https://`). Une fois par enfant.
 3. Dans `nhl_classement_tableau.yaml`, remplacez `calendar.enfant_1` et
-   `calendar.enfant_2` par les calendriers créés (ex. `calendar.liam`).
+   `calendar.enfant_2` par les calendriers créés (ex. `calendar.hockey_enfant`).
 
 ## Bon à savoir
 
